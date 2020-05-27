@@ -14,39 +14,118 @@
    <string>MMA Posture Labeler</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>921</width>
-      <height>541</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="openpose">
-     <attribute name="title">
-      <string>Keypoint Generator</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="labeler">
-     <attribute name="title">
-      <string>Labeling</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="teach">
-     <attribute name="title">
-      <string>Teach</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="predict">
-     <attribute name="title">
-      <string>Predict</string>
-     </attribute>
-    </widget>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="openpose">
+       <attribute name="title">
+        <string>Keypoint Generator</string>
+       </attribute>
+       <widget class="QPushButton" name="import_button">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>110</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Import Files</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="process_button">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>220</y>
+          <width>101</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Process Files</string>
+        </property>
+       </widget>
+       <widget class="QProgressBar" name="openpose_progress">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>270</y>
+          <width>331</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+       <widget class="QProgressBar" name="import_progress">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>140</y>
+          <width>331</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="status_label">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>380</y>
+          <width>51</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>READY</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QListWidget" name="filepaths_list">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>190</y>
+          <width>151</width>
+          <height>192</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>path/fileName</string>
+         </property>
+        </item>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="labeler">
+       <attribute name="title">
+        <string>Labeling</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="teach">
+       <attribute name="title">
+        <string>Teach</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="predict">
+       <attribute name="title">
+        <string>Predict</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
