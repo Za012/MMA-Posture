@@ -189,7 +189,7 @@
          <rect>
           <x>120</x>
           <y>80</y>
-          <width>47</width>
+          <width>141</width>
           <height>21</height>
          </rect>
         </property>
@@ -227,7 +227,7 @@
          </font>
         </property>
         <property name="text">
-         <string>File name</string>
+         <string/>
         </property>
        </widget>
       </widget>
