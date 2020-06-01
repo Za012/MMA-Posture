@@ -121,6 +121,12 @@
           <height>351</height>
          </rect>
         </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
+        </property>
        </widget>
        <widget class="QPushButton" name="btnGuard">
         <property name="geometry">
@@ -130,6 +136,9 @@
           <width>81</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgba(105, 155, 103, 160); border: none;</string>
         </property>
         <property name="text">
          <string>Guard</string>
@@ -205,6 +214,9 @@
           <width>81</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgba(255, 0, 0, 160); border: none;</string>
         </property>
         <property name="text">
          <string>Jab</string>
