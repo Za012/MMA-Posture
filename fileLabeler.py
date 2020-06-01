@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
 from PySide2 import QtGui
-from PySide2.QtGui import QBrush, QColor
+from PySide2.QtGui import QColor
 from PySide2.QtWidgets import QFileDialog
 import os
 
@@ -17,7 +17,6 @@ class FileLabeler:
         self.ui.btnGuard.clicked.connect(self.guardButtonClicked)
         self.ui.btnJab.clicked.connect(self.jabButtonClicked)
 
-
     def guardButtonClicked(self):
         self.addLabeledFramesToArray("guard", QColor(105, 155, 103, 127))
 
@@ -29,9 +28,16 @@ class FileLabeler:
             for path in self.filelistpaths:
                 splitpath = path.split('/')
                 if splitpath[len(splitpath) - 1] == item.text():
+                    self.checkLabeledArrayForDuplicated(path)
                     self.labeledFrames.append([pose, path])
             item.setBackground(color)
             item.setSelected(False)
+
+    def checkLabeledArrayForDuplicated(self, path):
+        if ["guard", path] in self.labeledFrames:
+            self.labeledFrames.remove(["guard", path])
+        if ["jab", path] in self.labeledFrames:
+            self.labeledFrames.remove(["jab", path])
 
     def itemSelectionChanged(self, item):
         for path in self.filelistpaths:
