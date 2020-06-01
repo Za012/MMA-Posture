@@ -34,10 +34,9 @@ class FileLabeler:
             item.setSelected(False)
 
     def checkLabeledArrayForDuplicated(self, path):
-        if ["guard", path] in self.labeledFrames:
-            self.labeledFrames.remove(["guard", path])
-        if ["jab", path] in self.labeledFrames:
-            self.labeledFrames.remove(["jab", path])
+        for labeled in self.labeledFrames:
+            if path in labeled[1]:
+                self.labeledFrames.remove(labeled)
 
     def itemSelectionChanged(self, item):
         for path in self.filelistpaths:
