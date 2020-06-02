@@ -12,43 +12,46 @@ import calendar
 import time
 
 
+def batch(iterable, n=1):
+    length = len(iterable)
+    for index in range(0, length, n):
+        yield iterable[index: min(index + n, length)]
+
+
 class KeyPointFormatter:
 
-    OpenPoseMap = [
-        "Nose",
-        "Neck",
-        "RShoulder",
-        "RElbow",
-        "RWrist",
-        "LShoulder",
-        "LElbow",
-        "LWrist",
-        "MidHip",
-        "RHip",
-        "RKnee",
-        "RAnkle",
-        "LHip",
-        "LKnee",
-        "LAnkle",
-        "REye",
-        "LEye",
-        "REar",
-        "LEar",
-        "LBigToe",
-        "LSmallToe",
-        "LHeel",
-        "RBigToe",
-        "RSmallToe",
-        "RHeel",
-        "Background",
-    ]
+    def __init__(self, ui):
+        self.ui = ui
+        self.openPoseMap = [
+            "Nose",
+            "Neck",
+            "RShoulder",
+            "RElbow",
+            "RWrist",
+            "LShoulder",
+            "LElbow",
+            "LWrist",
+            "MidHip",
+            "RHip",
+            "RKnee",
+            "RAnkle",
+            "LHip",
+            "LKnee",
+            "LAnkle",
+            "REye",
+            "LEye",
+            "REar",
+            "LEar",
+            "LBigToe",
+            "LSmallToe",
+            "LHeel",
+            "RBigToe",
+            "RSmallToe",
+            "RHeel",
+            "Background",
+        ]
 
-    def batch(iterable, n=1):
-        length = len(iterable)
-        for index in range(0, length, n):
-            yield iterable[index: min(index + n, length)]
-
-    def read_openpose_json(filename: str) -> List[Dict[str, Any]]:
+    def read_openpose_json(self, filename: str) -> List[Dict[str, Any]]:
         with open(filename, "rb") as f:
             keypoints_list = []
             keypoints = json.load(f)
@@ -71,43 +74,43 @@ class KeyPointFormatter:
                         "x": x,
                         "y": y,
                         "c": confidence,
-                        "point_label": OpenPoseMap[point_index],
+                        "point_label": self.openPoseMap[point_index],
                         "point_index": point_index,
                     }
                 )
 
             return keypoints_list
 
-    def get_all_openpose_json_files() -> List[str]:
+    def get_all_openpose_json_files(self) -> List[str]:
         # ... implement your files loader here ...
         return glob.glob("Generated/HenryTest/Video1/Keypoints/*.json")
 
-    def save_to_dataset(directory):
+    def save_to_dataset(self, directory):
 
         timestamp = calendar.timegm(time.gmtime())
 
-        for filename in get_all_openpose_json_files():
+        for filename in self.get_all_openpose_json_files():
 
-            keypoints = read_openpose_json(filename)
+            keypoints = self.read_openpose_json(filename)
 
-            datasetFile = directory + 'dataset_' + timestamp + '.csv'
+            dataset_file = directory + 'dataset_' + timestamp + '.csv'
 
-            with open(datasetFile, 'a', newline='') as csvfile:
+            with open(dataset_file, 'a', newline='') as csvfile:
 
-                fileEmpty = os.stat(datasetFile).st_size == 0
+                file_empty = os.stat(dataset_file).st_size == 0
 
-                writer = csv.DictWriter(csvfile, fieldnames=OpenPoseMap)
+                writer = csv.DictWriter(csvfile, fieldnames = self.openPoseMap)
 
-                if fileEmpty:
+                if file_empty:
                     writer.writeheader()  # file doesn't exist yet, write a header
 
-                rowToWrite = {}
+                row_to_write = {}
 
                 for keypoint in keypoints:
-                    rowToWrite.update({OpenPoseMap[keypoint['point_index']]: {
+                    row_to_write.update({self.openPoseMap[keypoint['point_index']]: {
                         "x": keypoint['x'],
                         "y": keypoint['y'],
                         "c": keypoint['c'],
                     }})
 
-                writer.writerow(rowToWrite)
+                writer.writerow(row_to_write)
