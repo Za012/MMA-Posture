@@ -13,7 +13,6 @@ class init(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.ui.import_button.setText("Potato")
         QMainWindow.show(self)
 
         #   INSTANTIATE GUI BACKEND
