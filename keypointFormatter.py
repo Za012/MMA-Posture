@@ -20,8 +20,8 @@ def batch(iterable, n=1):
 
 class KeyPointFormatter:
 
-    def __init__(self, ui):
-        self.ui = ui
+    def __init__(self):
+        self.keyPointsLabeled = List[str]
         self.openPoseMap = [
             "Nose",
             "Neck",
@@ -55,9 +55,10 @@ class KeyPointFormatter:
         with open(filename, "rb") as f:
             keypoints_list = []
             keypoints = json.load(f)
-            assert (
-                    len(keypoints["people"]) > 1  # check this with Zeid
-            ), "In all pictures, we should have only one person!"
+
+            #  assert (
+            #           len(keypoints["people"]) > 1  # check this with Zeid
+            #   ), "In all pictures, we should have only one person!"
 
             points_2d = keypoints["people"][0]["pose_keypoints_2d"]
             assert (
@@ -81,36 +82,69 @@ class KeyPointFormatter:
 
             return keypoints_list
 
-    def get_all_openpose_json_files(self) -> List[str]:
-        # ... implement your files loader here ...
-        return glob.glob("Generated/HenryTest/Video1/Keypoints/*.json")
+    def get_keypoint_file(self, file):
 
-    def save_to_dataset(self, directory):
+        file_path = os.path.basename(file)
 
+        file_directory = os.path.dirname(file)
+
+        filename_noextension = os.path.splitext(file_path)[0]
+
+        keypoints_directory = file_directory + "/Keypoints/"
+
+        return keypoints_directory + filename_noextension + '_keypoints.json'
+
+    def save_to_dataset(self, labeled_files, directory='Datasets/'):
+
+        # Get current time stamp
         timestamp = calendar.timegm(time.gmtime())
 
-        for filename in self.get_all_openpose_json_files():
+        # Loop through keypoints directory
+        for labeled_file in labeled_files:
 
-            keypoints = self.read_openpose_json(filename)
+            type = labeled_file[0]
+            file = labeled_file[1]
 
-            dataset_file = directory + 'dataset_' + timestamp + '.csv'
+            ext = os.path.splitext(file)[-1].lower()
 
+            # check it is a valid file
+            if ext != '.jpg' and ext != '.jpeg' and ext != '.png':
+                print('Could not convert: ' + file)
+                continue
+
+            print('Generating formatted keypoints for... ' + file)
+
+            keyPointfile = self.get_keypoint_file(file)
+
+            # read openpose generated file
+            keyPoints = self.read_openpose_json(keyPointfile)
+
+            if not os.path.exists(directory + type + '/'):
+                os.makedirs(directory + type + '/')
+
+            # directory of file that will be created
+            dataset_file = directory + type + '/dataset_' + str(timestamp) + '.csv'
+
+            # process to write to csv file
             with open(dataset_file, 'a', newline='') as csvfile:
 
+                writer = csv.DictWriter(csvfile, fieldnames=self.openPoseMap)
+
+                # check if file has already been written to
                 file_empty = os.stat(dataset_file).st_size == 0
 
-                writer = csv.DictWriter(csvfile, fieldnames = self.openPoseMap)
-
                 if file_empty:
-                    writer.writeheader()  # file doesn't exist yet, write a header
+                    writer.writeheader()  # file doesn't exist yet, write the header
 
-                row_to_write = {}
+                row_to_write = {}  # variable to store the row we want to write
 
-                for keypoint in keypoints:
-                    row_to_write.update({self.openPoseMap[keypoint['point_index']]: {
-                        "x": keypoint['x'],
-                        "y": keypoint['y'],
-                        "c": keypoint['c'],
+                # loop through keyPoints and assign the correct body part according to it's index
+                for keyPoint in keyPoints:
+                    row_to_write.update({self.openPoseMap[keyPoint['point_index']]: {
+                        "x": keyPoint['x'],
+                        "y": keyPoint['y'],
+                        "c": keyPoint['c'],
                     }})
 
-                writer.writerow(row_to_write)
+                writer.writerow(row_to_write)  # write to row
+                print(dataset_file + " was written.")
