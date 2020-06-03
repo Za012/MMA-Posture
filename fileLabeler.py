@@ -4,18 +4,25 @@ from PySide2.QtGui import QColor
 from PySide2.QtWidgets import QFileDialog
 import os
 
+from keypointFormatter import KeyPointFormatter
+
+
 class FileLabeler:
     def __init__(self, ui):
         self.ui = ui
+        self.selectedDirectory = None
         self.filelistpaths = []
         self.selectedPaths = []
         self.labeledFrames = []
+        self.keyPointFormatter = KeyPointFormatter()
 
     def attach(self):
         self.ui.fileList.currentItemChanged.connect(self.itemSelectionChanged)
         self.ui.btnSelectDirectory.clicked.connect(self.directoryButtonClicked)
         self.ui.btnGuard.clicked.connect(self.guardButtonClicked)
         self.ui.btnJab.clicked.connect(self.jabButtonClicked)
+        self.ui.generateDatasetButton.clicked.connect(self.generateButtonClicked)
+        self.ui.generateDatasetButton.setEnabled(False)
 
     def guardButtonClicked(self):
         self.addLabeledFramesToArray("guard", QColor(105, 155, 103, 127))
@@ -34,9 +41,10 @@ class FileLabeler:
             item.setSelected(False)
 
     def checkLabeledArrayForDuplicated(self, path):
-        for labeled in self.labeledFrames:
-            if path in labeled[1]:
-                self.labeledFrames.remove(labeled)
+        if ["guard", path] in self.labeledFrames:
+            self.labeledFrames.remove(["guard", path])
+        if ["jab", path] in self.labeledFrames:
+            self.labeledFrames.remove(["jab", path])
 
     def itemSelectionChanged(self, item):
         for path in self.filelistpaths:
@@ -49,8 +57,14 @@ class FileLabeler:
 
     def directoryButtonClicked(self):
         dialog = QFileDialog.getExistingDirectory()
+        self.selectedDirectory = dialog
         self.ui.fileList.addItems(os.listdir(dialog))
         for file in os.listdir(dialog):
-            self.filelistpaths.append(dialog+"/"+file)
+            self.filelistpaths.append(dialog + "/" + file)
         splitdirpath = dialog.split("/")
-        self.ui.lblSelectedDirectory.setText(splitdirpath[len(splitdirpath)-1])
+        self.ui.lblSelectedDirectory.setText(splitdirpath[len(splitdirpath) - 1])
+        # enable/disable generated button
+        self.ui.generateDatasetButton.setEnabled(self.selectedDirectory is not None)
+
+    def generateButtonClicked(self):
+        self.keyPointFormatter.save_to_dataset(self.labeledFrames)
