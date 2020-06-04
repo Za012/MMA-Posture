@@ -13,9 +13,7 @@ class init(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.ui.import_button.setText("Potato")
 
-        QMainWindow.show(self)
 
         #   INSTANTIATE GUI BACKEND
         # KeyPoint Generator
@@ -25,7 +23,7 @@ class init(QMainWindow):
         # File labeler
         labeler = FileLabeler(self.ui)
         labeler.attach()
-
+        QMainWindow.show(self)
         sys.exit(app.exec_())
 
 

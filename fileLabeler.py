@@ -1,7 +1,8 @@
 # This Python file uses the following encoding: utf-8
 from PySide2 import QtGui
+from PySide2.QtCore import QRect
 from PySide2.QtGui import QColor
-from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QAbstractItemView
 import os
 
 from keypointFormatter import KeyPointFormatter
@@ -23,12 +24,33 @@ class FileLabeler:
         self.ui.btnJab.clicked.connect(self.jabButtonClicked)
         self.ui.generateDatasetButton.clicked.connect(self.generateButtonClicked)
         self.ui.generateDatasetButton.setEnabled(False)
+        self.ui.btnDeselect.clicked.connect(self.deselectButtonClicked)
 
     def guardButtonClicked(self):
         self.addLabeledFramesToArray("guard", QColor(105, 155, 103, 127))
 
     def jabButtonClicked(self):
         self.addLabeledFramesToArray("jab", QColor(255, 0, 0, 127))
+
+    def generateButtonClicked(self):
+        self.keyPointFormatter.save_to_dataset(self.labeledFrames)
+        self.clear()
+
+    def deselectButtonClicked(self):
+        for item in self.ui.fileList.selectedItems():
+            for labeled in self.labeledFrames:
+                split = labeled[1].split('/')
+                if item.text() == split[len(split)-1]:
+                    self.labeledFrames.remove(labeled)
+
+            item.setBackground(QColor(0,0,0,0))
+            item.setSelected(False)
+
+    def clear(self):
+        self.labeledFrames.clear()
+        self.ui.fileList.clear()
+
+
 
     def addLabeledFramesToArray(self, pose, color):
         for item in self.ui.fileList.selectedItems():
@@ -46,6 +68,8 @@ class FileLabeler:
                 self.labeledFrames.remove(labeled)
 
     def itemSelectionChanged(self, item):
+        if not item:
+            return
         for path in self.filelistpaths:
             splitpath = path.split('/')
             if splitpath[len(splitpath) - 1] == item.text():
@@ -55,15 +79,31 @@ class FileLabeler:
                 self.ui.imagePreview.show()
 
     def directoryButtonClicked(self):
+        self.clear()
         dialog = QFileDialog.getExistingDirectory()
         self.selectedDirectory = dialog
-        self.ui.fileList.addItems(os.listdir(dialog))
+
+        for item in os.listdir(dialog):
+            extension = item.split('.')
+            if extension[len(extension)-1] == 'jpg' or extension[len(extension)-1] == 'png' or extension[len(extension)-1] == 'jpeg':
+                self.ui.fileList.addItem(ListWidgetItem(item))
+
         for file in os.listdir(dialog):
             self.filelistpaths.append(dialog + "/" + file)
+
         splitdirpath = dialog.split("/")
         self.ui.lblSelectedDirectory.setText(splitdirpath[len(splitdirpath) - 1])
+
         # enable/disable generated button
         self.ui.generateDatasetButton.setEnabled(self.selectedDirectory is not None)
+        self.ui.fileList.sortItems()
+        self.ui.fileList.show()
 
-    def generateButtonClicked(self):
-        self.keyPointFormatter.save_to_dataset(self.labeledFrames)
+
+
+
+class ListWidgetItem(QListWidgetItem):
+    def __lt__(self, other):
+        return float(self.text().split('frame')[1].split('.')[0]) < float(other.text().split('frame')[1].split('.')[0])
+
+

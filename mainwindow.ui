@@ -311,6 +311,22 @@
          <string>Generate dataset from selected frames</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="btnDeselect">
+        <property name="geometry">
+         <rect>
+          <x>590</x>
+          <y>70</y>
+          <width>81</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgba(0, 0, 0, 60); border: none;</string>
+        </property>
+        <property name="text">
+         <string>Deselect</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="teach">
        <attribute name="title">
