@@ -140,11 +140,9 @@ class KeyPointFormatter:
 
                 # loop through keyPoints and assign the correct body part according to it's index
                 for keyPoint in keyPoints:
-                    row_to_write.update({self.openPoseMap[keyPoint['point_index']]: {
-                        keyPoint['x'],
-                        keyPoint['y'],
-                        keyPoint['c'],
-                    }})
+                    row_to_write.update({self.openPoseMap[keyPoint['point_index']]: "%s,%s,%s" % (
+                        keyPoint['x'], keyPoint['y'], keyPoint['c'])
+                                         })
 
                 writer.writerow(row_to_write)  # write to row
                 print(dataset_file + " was written.")
