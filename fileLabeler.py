@@ -49,6 +49,8 @@ class FileLabeler:
     def clear(self):
         self.labeledFrames.clear()
         self.ui.fileList.clear()
+        self.selectedDirectory = None
+        self.filelistpaths.clear()
 
 
 
