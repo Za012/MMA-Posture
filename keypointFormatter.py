@@ -60,6 +60,13 @@ class KeyPointFormatter:
             #           len(keypoints["people"]) > 1  # check this with Zeid
             #   ), "In all pictures, we should have only one person!"
 
+            try:
+                keypoints["people"][0]["pose_keypoints_2d"]
+            except IndexError:
+                print("No people present in given frame")
+                return False
+
+
             points_2d = keypoints["people"][0]["pose_keypoints_2d"]
             assert (
                     len(points_2d) == 25 * 3
@@ -118,6 +125,9 @@ class KeyPointFormatter:
 
             # read openpose generated file
             keyPoints = self.read_openpose_json(keyPointfile)
+
+            if not keyPoints:
+                continue
 
             if not os.path.exists(directory + type + '/'):
                 os.makedirs(directory + type + '/')
