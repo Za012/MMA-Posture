@@ -33,7 +33,7 @@ class FileLabeler:
         self.addLabeledFramesToArray("jab", QColor(255, 0, 0, 127))
 
     def generateButtonClicked(self):
-        self.keyPointFormatter.save_to_dataset(self.labeledFrames)
+        self.keyPointFormatter.save_to_dataset(self.labeledFrames,self.batchName)
         self.clear()
 
     def deselectButtonClicked(self):
@@ -95,7 +95,7 @@ class FileLabeler:
 
         splitdirpath = dialog.split("/")
         self.ui.lblSelectedDirectory.setText(splitdirpath[len(splitdirpath) - 1])
-
+        self.batchName = splitdirpath[len(splitdirpath)-2]
         # enable/disable generated button
         self.ui.generateDatasetButton.setEnabled(self.selectedDirectory is not None)
         self.ui.fileList.sortItems()

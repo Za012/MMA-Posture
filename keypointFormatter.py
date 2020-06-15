@@ -101,7 +101,7 @@ class KeyPointFormatter:
 
         return keypoints_directory + filename_noextension + '_keypoints.json'
 
-    def save_to_dataset(self, labeled_files, directory='Datasets/'):
+    def save_to_dataset(self, labeled_files, batchName, directory='Datasets/'):
 
         # Get current time stamp
         timestamp = calendar.timegm(time.gmtime())
@@ -129,11 +129,11 @@ class KeyPointFormatter:
             if not keyPoints:
                 continue
 
-            if not os.path.exists(directory + type + '/'):
-                os.makedirs(directory + type + '/')
+            if not os.path.exists(directory + batchName +'/'+ type + '/'):
+                os.makedirs(directory + batchName +'/'+ type + '/')
 
             # directory of file that will be created
-            dataset_file = directory + type + '/dataset_' + str(timestamp) + '.csv'
+            dataset_file = directory + batchName +'/'+ type + '/dataset_' + str(timestamp) + '.csv'
 
             # process to write to csv file
             with open(dataset_file, 'a', newline='') as csvfile:

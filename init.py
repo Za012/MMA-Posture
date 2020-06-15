@@ -4,6 +4,8 @@ from PySide2.QtWidgets import QApplication, QMainWindow
 from ui_mainwindow import Ui_MainWindow
 from keypointGen import KeyPointGenerator
 from fileLabeler import FileLabeler
+from teach import Teach
+
 
 class init(QMainWindow):
     def __init__(self):
@@ -23,6 +25,11 @@ class init(QMainWindow):
         # File labeler
         labeler = FileLabeler(self.ui)
         labeler.attach()
+
+        # Teacher
+        teach = Teach(self.ui)
+        teach.attach()
+
         QMainWindow.show(self)
         sys.exit(app.exec_())
 
