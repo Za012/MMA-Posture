@@ -25,16 +25,13 @@ class FramePredictor:
         self.ui = ui
         self.files = []
         self.selectedDirectory = None
-        self.frameDirectory = None
         self.keypointFormatter = KeyPointFormatter()
         self.batchName = None
         self.selectedModel = None
         self.filesPredicted = None
 
-        self.ui.filepaths_list.clear()
-        self.ui.openpose_progress.setValue(0)
-        self.ui.status_label.setText("Import Files please")
-        self.ui.process_button.setEnabled(False)
+        self.ui.predict_filelist.clear()
+        self.ui.predict_progressbar.setValue(0)
         print("FramePredictor init")
 
     def attach(self):
@@ -42,8 +39,17 @@ class FramePredictor:
         self.ui.predict_process_button.clicked.connect(self.process_files)
         self.ui.predict_select_button.clicked.connect(self.select_file)
         self.ui.predict_select_model.clicked.connect(self.select_model)
+        self.ui.predict_clear_list.clicked.connect(self.clear)
         self.ui.predict_confidence_label.setText('')
         self.ui.predict_filename_label.setText('')
+
+    def clear(self):
+        self.files = []
+        self.selectedDirectory = None
+        self.batchName = None
+        self.selectedModel = None
+        self.filesPredicted = None
+        self.ui.predict_filelist.clear()
 
     def check_for_enable_process_button(self):
         self.ui.predict_process_button.setEnabled(self.selectedModel is not None and self.files is not None)
@@ -104,7 +110,7 @@ class FramePredictor:
         src = "temp/" + batchName + "/"
         if not os.path.exists(src):
             os.makedirs(src)
-        return dst
+
         # Do Openpose on batch on each video and save keypoints
         i = 0
         progress = 5
