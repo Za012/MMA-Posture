@@ -149,7 +149,7 @@ class FramePredictor:
             print("Processing Batch: " + vidBatch)
             op.pose(dst + vidBatch, keypointdst)
             # for each frame Go through openpose and dump output into keypointdst
-        self.ui.openpose_progress_p.setValue(100)
+        self.ui.predict_progressbar.setValue(100)
         print("DONE, You can now close OpenPose window.")
 
         return dst
@@ -209,6 +209,14 @@ class FramePredictor:
             return None
 
         batch_name = self.PREDICT_DIRECTORY + batch_name
+
+        dst = "temp/" + batch_name + "/"
+        if not os.path.exists(dst):
+            os.makedirs(dst)
+        for src in self.files:
+            print(src)
+            splitpath = src.split("/")
+            sh.copyfile(src, dst + splitpath[len(splitpath) - 1])
 
         keypoints_directory = self.keypointgeneration(batch_name)
 
