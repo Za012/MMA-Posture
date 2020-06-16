@@ -116,6 +116,10 @@ class Ui_MainWindow(object):
         self.btnDeselect.setObjectName(u"btnDeselect")
         self.btnDeselect.setGeometry(QRect(590, 70, 81, 31))
         self.btnDeselect.setStyleSheet(u"background-color: rgba(0, 0, 0, 60); border: none;")
+        self.btnUppercut = QPushButton(self.labeler)
+        self.btnUppercut.setObjectName(u"btnUppercut")
+        self.btnUppercut.setGeometry(QRect(800, 20, 81, 31))
+        self.btnUppercut.setStyleSheet(u"background-color: rgba(255, 150, 0, 160); border: none;")
         self.tabWidget.addTab(self.labeler, "")
         self.teach = QWidget()
         self.teach.setObjectName(u"teach")
@@ -218,7 +222,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -248,6 +252,7 @@ class Ui_MainWindow(object):
         self.lblSelectedFile.setText("")
         self.generateDatasetButton.setText(QCoreApplication.translate("MainWindow", u"Generate dataset from selected frames", None))
         self.btnDeselect.setText(QCoreApplication.translate("MainWindow", u"Deselect", None))
+        self.btnUppercut.setText(QCoreApplication.translate("MainWindow", u"Uppercut", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.labeler), QCoreApplication.translate("MainWindow", u"Labeling", None))
         self.datasetSelectBtn.setText(QCoreApplication.translate("MainWindow", u"Select Directory", None))
         self.datasetLabel.setText(QCoreApplication.translate("MainWindow", u"Select a Dataset to teach the model", None))

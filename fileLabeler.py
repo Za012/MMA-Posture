@@ -20,11 +20,15 @@ class FileLabeler:
     def attach(self):
         self.ui.fileList.currentItemChanged.connect(self.itemSelectionChanged)
         self.ui.btnSelectDirectory.clicked.connect(self.directoryButtonClicked)
+        self.ui.btnUppercut.clicked.connect(self.uppercutButtonClicked)
         self.ui.btnGuard.clicked.connect(self.guardButtonClicked)
         self.ui.btnJab.clicked.connect(self.jabButtonClicked)
         self.ui.generateDatasetButton.clicked.connect(self.generateButtonClicked)
         self.ui.generateDatasetButton.setEnabled(False)
         self.ui.btnDeselect.clicked.connect(self.deselectButtonClicked)
+
+    def uppercutButtonClicked(self):
+        self.addLabeledFramesToArray("uppercut", QColor(255, 150, 0, 160))
 
     def guardButtonClicked(self):
         self.addLabeledFramesToArray("guard", QColor(105, 155, 103, 127))
