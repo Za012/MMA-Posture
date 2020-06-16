@@ -37,7 +37,7 @@ class FileLabeler:
         self.addLabeledFramesToArray("jab", QColor(255, 0, 0, 127))
 
     def generateButtonClicked(self):
-        self.keyPointFormatter.save_labels_to_dataset(self.labeledFrames,self.batchName)
+        self.keyPointFormatter.save_files_to_dataset(self.labeledFrames,self.batchName)
         self.clear()
 
     def deselectButtonClicked(self):

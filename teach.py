@@ -35,7 +35,9 @@ class Teach:
         # add list clear btn / also clears self.files
 
     def selectDatasetDirectory(self):
-        dirs = QFileDialog.getExistingDirectory()
+        dirs = QFileDialog.getExistingDirectory(None,"Select a batch","datasets")
+        if not dirs:
+            return
         print(dirs)
         pathArray = dirs.split('/')
         self.batchName = pathArray[len(pathArray) - 1]
@@ -131,7 +133,7 @@ class Teach:
         reg = l2(0.0005)
         inputShape = (1, 25, 3)
         chanDim = -1
-        classes = len(self.postures)  # len of labels (2 for now)
+        classes = len(self.postures)  # len of labels (3 for now)
         ####
 
         model = Sequential()
@@ -148,11 +150,11 @@ class Teach:
         model.add(Conv2D(32, (3, 3), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
+        # model.add(BatchNormalization(axis=chanDim))
         model.add(Conv2D(32, (3, 3), strides=(2, 2), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
+        # model.add(BatchNormalization(axis=chanDim))
         model.add(Dropout(0.25))
 
         # stack two more CONV layers, keeping the size of each filter
@@ -161,36 +163,32 @@ class Teach:
         model.add(Conv2D(64, (2, 2), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
         model.add(Conv2D(64, (2, 6), strides=(2, 2), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
         model.add(Dropout(0.25))
 
         # increase the number of filters again, this time to 128
         model.add(Conv2D(128, (6, 4), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
 
         model.add(Conv2D(128, (3, 3), strides=(2, 2), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        model.add(BatchNormalization(axis=chanDim))
         model.add(Dropout(0.25))
 
         # fully-connected layer
         model.add(Flatten())
         model.add(Dense(512, kernel_initializer=init))
         model.add(Activation("relu"))
-        model.add(BatchNormalization())
         model.add(Dropout(0.5))
         # softmax classifier
         model.add(Dense(classes))
         model.add(Activation("softmax"))
 
         print("MODEL PREPARED")
-        model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
         print("MODEL COMPILED")
         return model
