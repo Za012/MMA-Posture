@@ -152,7 +152,7 @@ class FramePredictor:
         self.ui.predict_progressbar.setValue(100)
         print("DONE, You can now close OpenPose window.")
 
-        return dst + "Video" + str(len(os.listdir(src)) - 1) + "/"
+        return dst + "Video" + str(len(os.listdir(dst)) - 1) + "/"
 
     def format_dataset(self, dataFile):
         dataset = []
