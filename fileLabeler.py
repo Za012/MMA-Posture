@@ -33,7 +33,7 @@ class FileLabeler:
         self.addLabeledFramesToArray("jab", QColor(255, 0, 0, 127))
 
     def generateButtonClicked(self):
-        self.keyPointFormatter.save_to_dataset(self.labeledFrames,self.batchName)
+        self.keyPointFormatter.save_labels_to_dataset(self.labeledFrames,self.batchName)
         self.clear()
 
     def deselectButtonClicked(self):
@@ -102,10 +102,6 @@ class FileLabeler:
         self.ui.fileList.show()
 
 
-
-
 class ListWidgetItem(QListWidgetItem):
     def __lt__(self, other):
         return float(self.text().split('frame')[1].split('.')[0]) < float(other.text().split('frame')[1].split('.')[0])
-
-

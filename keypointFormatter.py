@@ -66,7 +66,6 @@ class KeyPointFormatter:
                 print("No people present in given frame")
                 return False
 
-
             points_2d = keypoints["people"][0]["pose_keypoints_2d"]
             assert (
                     len(points_2d) == 25 * 3
@@ -101,8 +100,31 @@ class KeyPointFormatter:
 
         return keypoints_directory + filename_noextension + '_keypoints.json'
 
-    def save_to_dataset(self, labeled_files, batchName, directory='Datasets/'):
+    def write_to_csv(self, dataset_file, keyPoints):
+        # process to write to csv file
+        with open(dataset_file, 'a', newline='') as csvfile:
 
+            writer = csv.DictWriter(csvfile, fieldnames=self.openPoseMap)
+
+            # check if file has already been written to
+            file_empty = os.stat(dataset_file).st_size == 0
+
+            if file_empty:
+                writer.writeheader()  # file doesn't exist yet, write the header
+
+            row_to_write = {}  # variable to store the row we want to write
+
+            # loop through keyPoints and assign the correct body part according to it's index
+            for keyPoint in keyPoints:
+                row_to_write.update({self.openPoseMap[keyPoint['point_index']]: "%s,%s,%s" % (
+                    keyPoint['x'], keyPoint['y'], keyPoint['c'])
+                                     })
+
+            writer.writerow(row_to_write)  # write to row
+            print(dataset_file + " was written.")
+
+    def save_labels_to_dataset(self, labeled_files, batchName, directory='Datasets/'):
+        print(labeled_files)
         # Get current time stamp
         timestamp = calendar.timegm(time.gmtime())
 
@@ -136,23 +158,39 @@ class KeyPointFormatter:
             dataset_file = directory + batchName +'/'+ type + '/dataset_' + str(timestamp) + '.csv'
 
             # process to write to csv file
-            with open(dataset_file, 'a', newline='') as csvfile:
+            self.write_to_csv(dataset_file, keyPoints)
 
-                writer = csv.DictWriter(csvfile, fieldnames=self.openPoseMap)
+    def save_file_to_dataset(self, file, batchname, directory='Results/'):
 
-                # check if file has already been written to
-                file_empty = os.stat(dataset_file).st_size == 0
+        directory = directory + batchname
 
-                if file_empty:
-                    writer.writeheader()  # file doesn't exist yet, write the header
+        timestamp = calendar.timegm(time.gmtime())
 
-                row_to_write = {}  # variable to store the row we want to write
+        ext = os.path.splitext(file)[-1].lower()
 
-                # loop through keyPoints and assign the correct body part according to it's index
-                for keyPoint in keyPoints:
-                    row_to_write.update({self.openPoseMap[keyPoint['point_index']]: "%s,%s,%s" % (
-                        keyPoint['x'], keyPoint['y'], keyPoint['c'])
-                                         })
+        # check it is a valid file
+        if ext != '.jpg' and ext != '.jpeg' and ext != '.png':
+            print('Could not convert: ' + file)
+            return None
 
-                writer.writerow(row_to_write)  # write to row
-                print(dataset_file + " was written.")
+        print('Generating formatted keypoints for... ' + file)
+
+        keyPointfile = self.get_keypoint_file(file)
+
+        # read openpose generated file
+        keyPoints = self.read_openpose_json(keyPointfile)
+
+        if not keyPoints:
+            print('No people present in file: ' + file)
+            return None
+
+        if not os.path.exists(directory + str(timestamp) + '/'):
+            os.makedirs(directory + str(timestamp) + '/')
+
+        # directory of file that will be created
+        dataset_file = directory + str(timestamp) + '/result_' + str(timestamp) + '.csv'
+
+        # process to write to csv file
+        self.write_to_csv(dataset_file, keyPoints)
+
+        return dataset_file

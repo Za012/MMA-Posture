@@ -1,4 +1,7 @@
 # This Python file uses the following encoding: utf-8
+import string
+from random import random
+
 from PySide2.QtWidgets import QFileDialog
 import shutil as sh
 import os
@@ -62,6 +65,7 @@ class KeyPointGenerator:
         self.keypointgeneration(batchName)
 
     def keypointgeneration(self, batchName):
+
         if not os.path.exists("Generated/"):
             os.mkdir("Generated")
         dst = "Generated/" + batchName + "/"
@@ -109,3 +113,9 @@ class KeyPointGenerator:
             # for each frame Go through openpose and dump output into keypointdst
         self.ui.openpose_progress.setValue(100)
         self.ui.status_label.setText("DONE, You can now close OpenPose window.")
+
+    def clear(self):
+        self.labeledFrames.clear()
+        self.ui.fileList.clear()
+        self.selectedDirectory = None
+        self.filelistpaths.clear()
