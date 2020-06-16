@@ -31,7 +31,7 @@ class FramePredictor:
         self.filesPredicted = None
         self.loadedModel = None
         self.data_folder_path = os.listdir('datasets/')
-        self.labels = ['jab', 'guard', 'upper']
+        self.labels = ['guard', 'jab', 'upper']
 
         self.ui.predict_filelist.clear()
         self.ui.predict_progressbar.setValue(0)
@@ -87,18 +87,17 @@ class FramePredictor:
             confidence = file[1]
             splitpath = filename.split('/')
             if splitpath[len(splitpath) - 1] == item.text():
-                self.ui.predict_filename_label.setText(str(item.text()))
+                print(file)
+                self.ui.predict_filename_label.setText(str(os.path.basename(item.text())))
                 self.ui.predict_confidence_label.setText(str(confidence))
                 pixmap = QtGui.QPixmap(filename)
                 self.ui.predict_image_preview.setPixmap(pixmap)
                 self.ui.predict_image_preview.show()
 
-    def display_files_in_ui(self, directory):
-        for item in os.listdir(directory):
-            extension = item.split('.')
-            if extension[len(extension) - 1] == 'jpg' or extension[len(extension) - 1] == 'png' or extension[
-                len(extension) - 1] == 'jpeg':
-                self.ui.predict_filelist.addItem(ListWidgetItem(item))
+
+    def display_files_in_ui(self, files):
+        for item in files:
+            self.ui.predict_filelist.addItem(ListWidgetItem(item))
 
         self.ui.predict_filelist.sortItems()
         self.ui.predict_filelist.show()
@@ -160,48 +159,55 @@ class FramePredictor:
     def format_dataset(self, dataFile):
         dataset = []
         count = 0
-        pose = pd.read_csv(dataFile).values
+        data = [pd.read_csv(dataFile).values]
 
-        for row in pose:
-            dataset.append([])  # Person (useless dimension, but needed to get 4d)
-            personCount = 0
-            for person in range(1):
-                dataset[count].append([])  # Frame (This is the actual keypoint array (aka 1 row in the excel))
-                for cell in row:  # The cell is a string (aka xyc) so we'll split by comma and format each number we get
-                    if cell == "0":
-                        cell = "0,0,0"
-                    if type(cell) != float:
-                        buffer = cell.split(',')
-                        array = np.empty(shape=len(buffer))  # Was necessary due to it being a float or something
-                        i = 0
-                        for number in buffer:
-                            array[i] = float(number)
-                            i += 1
-                        # print(array)
-                        dataset[count][personCount].append(array)  # Put it in the main dataset
-                personCount += 1
-            count += 1
+        for pose in data:
+            for row in pose:
+                dataset.append([])  # Person (useless dimension, but needed to get 4d)
+                personCount = 0
+                for person in range(1):
+                    dataset[count].append([])  # Frame (This is the actual keypoint array (aka 1 row in the excel))
+                    for cell in row:  # The cell is a string (aka xyc) so we'll split by comma and format each number we get
+                        if cell == "0":
+                            cell = "0,0,0"
+                        if type(cell) != float:
+                            buffer = cell.split(',')
+                            array = np.empty(shape=len(buffer))  # Was necessary due to it being a float or something
+                            i = 0
+                            for number in buffer:
+                                array[i] = float(number)
+                                i += 1
+                            # print(array)
+                            dataset[count][personCount].append(array)  # Put it in the main dataset
+                    personCount += 1
+                count += 1
         return np.array(dataset)  # Parse it into a numpy array and return!
         # (It was a Python array in the beginning)
         # Reason why it's like this is due to the 'efficency' of numpy arrays makes them not able to
         # have data appended to them, the size of the array has to be known.
         # But Python array is easier to work with in this case
 
-    def predict(self, value_to_predict):
+    def predict(self, value_to_predict, frame_files):
         if not self.selectedModel:
             print('no model selected')
             return None
 
         results = self.loadedModel.predict(value_to_predict)
 
-        for desiredlbl in range(len(self.data_folder_path)):
-            labels = np.argmax(results, axis=1)
-            count = 0
-            for result in results:
-                if labels[count] == desiredlbl:
-                    return "Likely a " + self.labels[labels[count]] + " with a confidence of " \
-                           + str(round(Decimal(result[labels[count]] * 100), 2))
-                count += 1
+        indexed_results = []
+
+        labels = np.argmax(results, axis=1)
+        count = 0
+        for result in results:
+            indexed_results.append(
+                [frame_files[count],
+                 "Likely a " + self.labels[labels[count]] + " with a confidence of " \
+                 + str(round(Decimal(result[labels[count]] * 100), 2))
+                 ]
+            )
+            count += 1
+
+        return indexed_results
 
     def process_files(self):
         batch_name = self.ui.predict_batch_name.toPlainText()
@@ -233,7 +239,7 @@ class FramePredictor:
             return None
         print("directory " + keypoints_directory)
 
-        frame_files = os.listdir(keypoints_directory)
+        frame_files = [os.path.abspath(os.path.join(keypoints_directory, p)) for p in os.listdir(keypoints_directory) if p.endswith('jpg') or p.endswith('png')]
 
         if not frame_files:
             print('No files in directory')
@@ -242,30 +248,19 @@ class FramePredictor:
         print("frame_files ")
         print(frame_files)
 
-        files_to_predict = []
+        dataset_results_directory = 'Results/'
 
-        # Loop through keypoints directory
-        for frameFile in frame_files:
-            extension = frameFile.split('.')
-            if extension[len(extension) - 1] == 'jpg' or extension[len(extension) - 1] == 'png' or extension[
-                len(extension) - 1] == 'jpeg':
-                dataset_frame_file = self.keypointFormatter.save_file_to_dataset(keypoints_directory + frameFile,
-                                                                                 batch_name)
-                data_for_prediction = self.format_dataset(dataset_frame_file)
-                files_to_predict.append([keypoints_directory + frameFile, data_for_prediction])
+        dataset_file = self.keypointFormatter.save_files_to_dataset(frame_files, batch_name, False, dataset_results_directory)
+        print(dataset_file)
+        data_for_prediction = self.format_dataset(dataset_results_directory + batch_name + dataset_file)
+        print(dataset_results_directory + batch_name + dataset_file)
 
-        result_files = []
 
-        # Loop through keypoints directory
-        for file_to_predict in files_to_predict:
-            filename = file_to_predict[0]
-            data_for_prediction = file_to_predict[1]
-
-            confidence_string = self.predict(data_for_prediction)
-            result_files.append([filename, confidence_string])
+        result_files = self.predict(data_for_prediction, frame_files)
 
         self.filesPredicted = result_files
-        self.display_files_in_ui(keypoints_directory)
+
+        self.display_files_in_ui(frame_files)
 
 
 class ListWidgetItem(QListWidgetItem):

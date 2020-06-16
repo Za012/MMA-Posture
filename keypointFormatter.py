@@ -123,16 +123,22 @@ class KeyPointFormatter:
             writer.writerow(row_to_write)  # write to row
             print(dataset_file + " was written.")
 
-    def save_labels_to_dataset(self, labeled_files, batchName, directory='Datasets/'):
-        print(labeled_files)
+    def save_files_to_dataset(self, files, batchName, labeled=True, directory='Datasets/'):
+        print(files)
         # Get current time stamp
         timestamp = calendar.timegm(time.gmtime())
 
         # Loop through keypoints directory
-        for labeled_file in labeled_files:
+        for labeled_file in files:
 
-            type = labeled_file[0]
-            file = labeled_file[1]
+            if labeled is True:
+                type = '/' + labeled_file[0]
+                file = labeled_file[1]
+            else:
+                type = ''
+                file = labeled_file
+
+
 
             ext = os.path.splitext(file)[-1].lower()
 
@@ -151,46 +157,13 @@ class KeyPointFormatter:
             if not keyPoints:
                 continue
 
-            if not os.path.exists(directory + batchName +'/'+ type + '/'):
-                os.makedirs(directory + batchName +'/'+ type + '/')
+            if not os.path.exists(directory + batchName + type + '/'):
+                os.makedirs(directory + batchName + type + '/')
 
             # directory of file that will be created
-            dataset_file = directory + batchName +'/'+ type + '/dataset_' + str(timestamp) + '.csv'
+            dataset_file = directory + batchName + type + '/dataset_' + str(timestamp) + '.csv'
 
             # process to write to csv file
             self.write_to_csv(dataset_file, keyPoints)
 
-    def save_file_to_dataset(self, file, batchname, directory='Results/'):
-
-        directory = directory + batchname
-
-        timestamp = calendar.timegm(time.gmtime())
-
-        ext = os.path.splitext(file)[-1].lower()
-
-        # check it is a valid file
-        if ext != '.jpg' and ext != '.jpeg' and ext != '.png':
-            print('Could not convert: ' + file)
-            return None
-
-        print('Generating formatted keypoints for... ' + file)
-
-        keyPointfile = self.get_keypoint_file(file)
-
-        # read openpose generated file
-        keyPoints = self.read_openpose_json(keyPointfile)
-
-        if not keyPoints:
-            print('No people present in file: ' + file)
-            return None
-
-        if not os.path.exists(directory + str(timestamp) + '/'):
-            os.makedirs(directory + str(timestamp) + '/')
-
-        # directory of file that will be created
-        dataset_file = directory + str(timestamp) + '/result_' + str(timestamp) + '.csv'
-
-        # process to write to csv file
-        self.write_to_csv(dataset_file, keyPoints)
-
-        return dataset_file
+        return '/dataset_' + str(timestamp) + '.csv';
