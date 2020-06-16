@@ -29,6 +29,9 @@ class FramePredictor:
         self.batchName = None
         self.selectedModel = None
         self.filesPredicted = None
+        self.loadedModel = None
+        self.data_folder_path = os.listdir('datasets/')
+        self.labels = ['jab', 'guard', 'upper']
 
         self.ui.predict_filelist.clear()
         self.ui.predict_progressbar.setValue(0)
@@ -111,6 +114,7 @@ class FramePredictor:
         if not os.path.exists(src):
             os.makedirs(src)
 
+        return dst
         # Do Openpose on batch on each video and save keypoints
         i = 0
         progress = 5
@@ -159,7 +163,6 @@ class FramePredictor:
         count = 0
         pose = pd.read_csv(dataFile).values
 
-
         for row in pose:
             dataset.append([])  # Person (useless dimension, but needed to get 4d)
             personCount = 0
@@ -190,16 +193,16 @@ class FramePredictor:
             print('no model selected')
             return None
 
-        loaded_model = load_model(self.selectedModel)
-        results = loaded_model.predict(value_to_predict)
+        results = self.loadedModel.predict(value_to_predict)
 
-        labels = np.argmax(results, axis=1)
-        count = 0
-        for result in results:
-            x = Decimal(result[1] * 100)
-            if x < 50:
-                return str(labels[count]) + " With " + str(round(x, 2)) + "% Confidence"
-            count += 1
+        for desiredlbl in range(len(self.data_folder_path)):
+            labels = np.argmax(results, axis=1)
+            count = 0
+            for result in results:
+                if labels[count] == desiredlbl:
+                    return "Likely a " + self.labels[labels[count]] + " with a confidence of " \
+                           + str(round(Decimal(result[labels[count]] * 100), 2))
+                count += 1
 
     def process_files(self):
         batch_name = self.ui.predict_batch_name.toPlainText()
@@ -207,6 +210,12 @@ class FramePredictor:
         if not batch_name:
             print('No batch name received')
             return None
+
+        if not self.selectedModel:
+            print('No model received')
+            return None
+
+        self.loadedModel = load_model(self.selectedModel)
 
         batch_name = self.PREDICT_DIRECTORY + batch_name
 
@@ -241,7 +250,8 @@ class FramePredictor:
             extension = frameFile.split('.')
             if extension[len(extension) - 1] == 'jpg' or extension[len(extension) - 1] == 'png' or extension[
                 len(extension) - 1] == 'jpeg':
-                dataset_frame_file = self.keypointFormatter.save_file_to_dataset(keypoints_directory + frameFile, batch_name)
+                dataset_frame_file = self.keypointFormatter.save_file_to_dataset(keypoints_directory + frameFile,
+                                                                                 batch_name)
                 data_for_prediction = self.format_dataset(dataset_frame_file)
                 files_to_predict.append([keypoints_directory + frameFile, data_for_prediction])
 
@@ -257,6 +267,7 @@ class FramePredictor:
 
         self.filesPredicted = result_files
         self.display_files_in_ui(keypoints_directory)
+
 
 class ListWidgetItem(QListWidgetItem):
     def __lt__(self, other):
