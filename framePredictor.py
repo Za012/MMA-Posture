@@ -114,7 +114,6 @@ class FramePredictor:
         if not os.path.exists(src):
             os.makedirs(src)
 
-        return dst
         # Do Openpose on batch on each video and save keypoints
         i = 0
         progress = 5
