@@ -1,6 +1,4 @@
 # This Python file uses the following encoding: utf-8
-import string
-from random import random
 
 from PySide2.QtWidgets import QFileDialog
 import shutil as sh
@@ -114,8 +112,3 @@ class KeyPointGenerator:
         self.ui.openpose_progress.setValue(100)
         self.ui.status_label.setText("DONE, You can now close OpenPose window.")
 
-    def clear(self):
-        self.labeledFrames.clear()
-        self.ui.fileList.clear()
-        self.selectedDirectory = None
-        self.filelistpaths.clear()

@@ -4,6 +4,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow
 from ui_mainwindow import Ui_MainWindow
 from keypointGen import KeyPointGenerator
 from fileLabeler import FileLabeler
+from framePredictor import FramePredictor
 from teach import Teach
 
 
@@ -29,6 +30,10 @@ class init(QMainWindow):
         # Teacher
         teach = Teach(self.ui)
         teach.attach()
+
+        # Teacher
+        framePredictor = FramePredictor(self.ui)
+        framePredictor.attach()
 
         QMainWindow.show(self)
         sys.exit(app.exec_())
