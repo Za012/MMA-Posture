@@ -104,7 +104,7 @@ class FramePredictor:
         self.keypointManager.batchName = self.PREDICT_DIRECTORY + batch_name
         self.keypointManager.files = self.files
         self.keypointManager.create_batch_temporary_directory()
-        self.keypointManager.create_batch_temporary_directory()
+        self.keypointManager.copy_files_to_temporary_directory()
         keypoints_directory = self.keypointManager.generate_frames_and_keypoints(self.ui.predict_progressbar)
 
         if not keypoints_directory:
