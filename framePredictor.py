@@ -43,8 +43,16 @@ class FramePredictor:
         self.ui.predict_select_button.clicked.connect(self.select_file)
         self.ui.predict_select_model.clicked.connect(self.select_model)
         self.ui.predict_clear_list.clicked.connect(self.clear)
+        self.ui.tabWidget.currentChanged.connect(self.checkTabOpen)
         self.ui.predict_confidence_label.setText('')
-        self.ui.predict_filename_label.setText('')
+
+    def checkTabOpen(self):
+        if self.ui.modelName.toPlainText() is not None and self.ui.modelName.toPlainText() is not '':
+            self.ui.predict_batch_name.setText(self.ui.modelName.toPlainText())
+            self.ui.predict_batch_name.setEnabled(False)
+        else:
+            self.ui.predict_batch_name.setEnabled(True)
+            self.ui.predict_batch_name.setText('')
 
     def clear(self):
         self.files = []
@@ -94,10 +102,9 @@ class FramePredictor:
                 self.ui.predict_image_preview.setPixmap(pixmap)
                 self.ui.predict_image_preview.show()
 
-
     def display_files_in_ui(self, files):
         for item in files:
-            self.ui.predict_filelist.addItem(ListWidgetItem(item))
+            self.ui.predict_filelist.addItem(ListWidgetItem(os.path.basename(item)))
 
         self.ui.predict_filelist.sortItems()
         self.ui.predict_filelist.show()
@@ -239,7 +246,8 @@ class FramePredictor:
             return None
         print("directory " + keypoints_directory)
 
-        frame_files = [os.path.abspath(os.path.join(keypoints_directory, p)) for p in os.listdir(keypoints_directory) if p.endswith('jpg') or p.endswith('png')]
+        frame_files = [os.path.abspath(os.path.join(keypoints_directory, p)) for p in os.listdir(keypoints_directory) if
+                       p.endswith('jpg') or p.endswith('png')]
 
         if not frame_files:
             print('No files in directory')
@@ -250,11 +258,11 @@ class FramePredictor:
 
         dataset_results_directory = 'Results/'
 
-        dataset_file = self.keypointFormatter.save_files_to_dataset(frame_files, batch_name, False, dataset_results_directory)
+        dataset_file = self.keypointFormatter.save_files_to_dataset(frame_files, batch_name, False,
+                                                                    dataset_results_directory)
         print(dataset_file)
         data_for_prediction = self.format_dataset(dataset_results_directory + batch_name + dataset_file)
         print(dataset_results_directory + batch_name + dataset_file)
-
 
         result_files = self.predict(data_for_prediction, frame_files)
 
