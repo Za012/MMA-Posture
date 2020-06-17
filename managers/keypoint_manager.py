@@ -1,11 +1,9 @@
-# This Python file uses the following encoding: utf-8
-import scipy.io
-from tqdm import tqdm
-import scipy.io
-from tqdm import tqdm
-from typing import List, Dict, Any
+from PySide2.QtWidgets import QFileDialog
+import shutil as sh
+import cv2
+from openpose import OpenPose
+from typing import List
 import json
-import glob
 import csv
 import os
 import calendar
@@ -18,9 +16,10 @@ def batch(iterable, n=1):
         yield iterable[index: min(index + n, length)]
 
 
-class KeyPointFormatter:
+class KeyPointManager:
 
     def __init__(self):
+        self.files = []
         self.keyPointsLabeled = List[str]
         self.openPoseMap = [
             "Nose",
@@ -50,8 +49,91 @@ class KeyPointFormatter:
             "RHeel",
             "Background",
         ]
+        self.generationDirectory = 'Generated/'
+        self.batchName = None
+        self.temporaryDirectory = None
 
-    def read_openpose_json(self, filename: str) -> List[Dict[str, Any]]:
+    def create_batch_temporary_directory(self):
+
+        if not os.path.exists("temp/"):
+            os.mkdir("temp")
+
+        dst = "temp/" + self.batchName + "/"
+
+        if not os.path.exists(dst):
+            os.mkdir(dst)
+
+        self.temporaryDirectory = dst
+
+    def copy_files_to_temporary_directory(self):
+
+        for src in self.files:
+            print(src)
+            split_path = src.split("/")
+            sh.copyfile(src, self.temporaryDirectory + split_path[len(split_path) - 1])
+
+    def generate_frames_and_keypoints(self, ui_progress_bar=None):
+
+        if not os.path.exists(self.generationDirectory):
+            os.mkdir(self.generationDirectory)
+
+        dst = self.generationDirectory + self.batchName + "/"
+        if not os.path.exists(dst):
+            os.mkdir(dst)
+        
+        # Do Openpose on batch on each video and save keypoints
+        i = 0
+        progress = 5
+        for video in os.listdir(self.temporaryDirectory):
+            dump_path = dst + "Video" + str(i) + "/"
+            while os.path.exists(dump_path):
+                i += 1
+                dump_path = dst + "Video" + str(i) + "/"
+            os.mkdir(dump_path)
+
+            vidcap = cv2.VideoCapture(self.temporaryDirectory + video)
+            success, image = vidcap.read()
+            count = 0
+            progress += len(os.listdir(self.temporaryDirectory))
+            while success:
+                progress += 10 / progress
+
+                if ui_progress_bar is not None:
+                    ui_progress_bar.setValue(progress)
+
+                cv2.imwrite(dump_path + "frame%d.jpg" % count, image)  # save frame as JPEG file
+                success, image = vidcap.read()
+                count += 1
+            i += 1
+            vidcap.release()
+
+        if os.path.exists(self.temporaryDirectory):
+            sh.rmtree(self.temporaryDirectory)
+
+        op = OpenPose()
+
+        for vidBatch in os.listdir(dst):
+            progress += 100 / progress
+
+            if ui_progress_bar is not None:
+                ui_progress_bar.setValue(progress)
+
+            keypoint_dst = dst + vidBatch + "/Keypoints"
+
+            if not os.path.exists(keypoint_dst):
+                os.mkdir(keypoint_dst)
+
+            print("Processing Batch: " + vidBatch)
+            op.pose(dst + vidBatch, keypoint_dst)
+            # for each frame Go through openpose and dump output into keypointdst
+
+        if ui_progress_bar is not None:
+            ui_progress_bar.setValue(100)
+
+        return dst + "Video" + str(len(os.listdir(dst)) - 1) + "/"
+
+    def read_openpose_json(self, filename: str):
+
         with open(filename, "rb") as f:
             keypoints_list = []
             keypoints = json.load(f)
@@ -98,9 +180,15 @@ class KeyPointFormatter:
 
         keypoints_directory = file_directory + "/Keypoints/"
 
-        return keypoints_directory + filename_noextension + '_keypoints.json'
+        file = keypoints_directory + filename_noextension + '_keypoints.json'
 
-    def write_to_csv(self, dataset_file, keyPoints):
+        if not os.path.isfile(file):
+            print(file + " does not exist")
+            return None
+
+        return file
+
+    def write_keypoints_to_csv(self, dataset_file, key_points):
         # process to write to csv file
         with open(dataset_file, 'a', newline='') as csvfile:
 
@@ -115,7 +203,7 @@ class KeyPointFormatter:
             row_to_write = {}  # variable to store the row we want to write
 
             # loop through keyPoints and assign the correct body part according to it's index
-            for keyPoint in keyPoints:
+            for keyPoint in key_points:
                 row_to_write.update({self.openPoseMap[keyPoint['point_index']]: "%s,%s,%s" % (
                     keyPoint['x'], keyPoint['y'], keyPoint['c'])
                                      })
@@ -123,7 +211,7 @@ class KeyPointFormatter:
             writer.writerow(row_to_write)  # write to row
             print(dataset_file + " was written.")
 
-    def save_files_to_dataset(self, files, batchName, labeled=True, directory='Datasets/'):
+    def save_files_to_dataset(self, files, labeled=True, directory='Datasets/'):
         print(files)
         # Get current time stamp
         timestamp = calendar.timegm(time.gmtime())
@@ -138,8 +226,6 @@ class KeyPointFormatter:
                 type = ''
                 file = labeled_file
 
-
-
             ext = os.path.splitext(file)[-1].lower()
 
             # check it is a valid file
@@ -149,21 +235,21 @@ class KeyPointFormatter:
 
             print('Generating formatted keypoints for... ' + file)
 
-            keyPointfile = self.get_keypoint_file(file)
+            keypoints_file = self.get_keypoint_file(file)
 
             # read openpose generated file
-            keyPoints = self.read_openpose_json(keyPointfile)
+            keypoints = self.read_openpose_json(keypoints_file)
 
-            if not keyPoints:
+            if not keypoints:
                 continue
 
-            if not os.path.exists(directory + batchName + type + '/'):
-                os.makedirs(directory + batchName + type + '/')
+            if not os.path.exists(directory + self.batchName + type + '/'):
+                os.makedirs(directory + self.batchName + type + '/')
 
             # directory of file that will be created
-            dataset_file = directory + batchName + type + '/dataset_' + str(timestamp) + '.csv'
+            dataset_file = directory + self.batchName + type + '/dataset_' + str(timestamp) + '.csv'
 
             # process to write to csv file
-            self.write_to_csv(dataset_file, keyPoints)
+            self.write_keypoints_to_csv(dataset_file, keypoints)
 
-        return '/dataset_' + str(timestamp) + '.csv';
+        return '/dataset_' + str(timestamp) + '.csv'
