@@ -61,7 +61,7 @@ class FramePredictor:
         print("button clicked")
 
         self.ui.predict_progressbar.setValue(0)
-        dialog = QFileDialog.getOpenFileNames()
+        dialog = QFileDialog.getOpenFileNames(None, "Select a video", "/", "video(*.mp4 *.avi)")
         self.files += dialog[0]
 
         if len(self.files) > 0:
