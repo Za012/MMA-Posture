@@ -2,10 +2,10 @@
 import sys
 from PySide2.QtWidgets import QApplication, QMainWindow
 from ui_mainwindow import Ui_MainWindow
-from keypointGen import KeyPointGenerator
-from fileLabeler import FileLabeler
-from framePredictor import FramePredictor
-from teach import Teach
+from controllers.keypoint_generator import KeyPointGenerator
+from controllers.file_labeler import FileLabeler
+from controllers.file_predictor import FramePredictor
+from controllers.teach import Teach
 
 
 class init(QMainWindow):
@@ -16,12 +16,10 @@ class init(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-
-
         #   INSTANTIATE GUI BACKEND
         # KeyPoint Generator
-        keyGen = KeyPointGenerator(self.ui)
-        keyGen.attach()
+        key_gen = KeyPointGenerator(self.ui)
+        key_gen.attach()
 
         # File labeler
         labeler = FileLabeler(self.ui)
@@ -32,15 +30,12 @@ class init(QMainWindow):
         teach.attach()
 
         # Teacher
-        framePredictor = FramePredictor(self.ui)
-        framePredictor.attach()
+        frame_predictor = FramePredictor(self.ui)
+        frame_predictor.attach()
 
         QMainWindow.show(self)
         sys.exit(app.exec_())
 
 
-
 if __name__ == "__main__":
     init()
-
-
