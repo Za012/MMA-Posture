@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/openpose" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/openpose/3rdparty/caffe" vcs="Git" />
   </component>
 </project>

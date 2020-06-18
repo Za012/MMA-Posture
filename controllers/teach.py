@@ -35,8 +35,6 @@ class Teach:
         if not dirs:
             return
 
-        print(dirs)
-
         path_array = dirs.split('/')
         self.batchName = path_array[len(path_array) - 1]
         print("Selected Batch: " + self.batchName)
@@ -46,16 +44,12 @@ class Teach:
         count = 0
         self.labels = []
         for pose in self.postures:
-            print(pose)
             file_names = os.listdir(self.data_folder_path + self.batchName + '/' + pose)
-            print(pose + "/" + str(file_names))
             for file in file_names:
                 print("Processing: " + file)
                 self.data.append(pd.read_csv(self.data_folder_path + self.batchName + '/' + pose + "/" + file).values)
                 for i in range(len(self.data[count])):
                     self.labels.append(pose)
-                    print(i)
-                    print(len(self.data[count]))
                 count += 1
 
         self.ui.batchNameLabel.setText(self.batchName)
@@ -67,7 +61,6 @@ class Teach:
             self.ui.outputLabel.setText("Enter a model name")
             return
 
-        print(self.data)
         ds = FormatManager.format_dataset(self.data, False)
         self.kerasManager.labels = self.labels
         self.kerasManager.postures = self.postures

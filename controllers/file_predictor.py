@@ -35,12 +35,8 @@ class FramePredictor:
         self.ui.predict_confidence_label.setText('')
 
     def check_tab_open(self):
-        if self.ui.modelName.toPlainText() is not None and self.ui.modelName.toPlainText() is not '':
-            self.ui.predict_batch_name.setText(self.ui.modelName.toPlainText())
-            self.ui.predict_batch_name.setEnabled(False)
-        else:
-            self.ui.predict_batch_name.setEnabled(True)
-            self.ui.predict_batch_name.setText('')
+        self.ui.predict_batch_name.setEnabled(True)
+        self.ui.predict_batch_name.setText('')
 
     def clear(self):
         self.files = []
@@ -69,9 +65,9 @@ class FramePredictor:
 
         self.selectedModel = dialog[0][0] # path is encapsulated inside another array
 
-        if self.ui.predict_batch_name.toPlainText() == '' or self.ui.modelName.toPlainText() == '':
-            path = os.path.dirname(self.selectedModel)
-            self.ui.predict_batch_name.setText(os.path.basename(path))
+        path = os.path.dirname(self.selectedModel)
+        print(os.path.basename(path))
+        self.ui.predict_batch_name.setText(os.path.basename(path))
 
         self.check_for_enable_process_button()
 

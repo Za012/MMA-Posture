@@ -14,7 +14,7 @@ class KeyPointGenerator:
         self.ui.openpose_progress.setValue(0)
         self.ui.status_label.setText("Import Files please")
         self.ui.process_button.setEnabled(False)
-        print("Keypointgen init")
+        print("Keypoint Generator init")
 
     def attach(self):
         self.ui.import_button.clicked.connect(self.import_button_clicked)
