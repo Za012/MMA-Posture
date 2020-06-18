@@ -3,7 +3,6 @@ import os
 from PySide2.QtWidgets import QFileDialog, QListWidgetItem
 from PySide2 import QtGui
 
-
 from managers.keypoint_manager import KeyPointManager
 from managers.format_manager import FormatManager
 from managers.keras_manager import KerasManager
@@ -66,8 +65,14 @@ class FramePredictor:
 
     def select_model(self):
         self.ui.predict_progressbar.setValue(0)
-        dialog = QFileDialog.getOpenFileNames(None, "Select a Model", "/", "model(*.h5)")
-        self.selectedModel = dialog[0]
+        dialog = QFileDialog.getOpenFileNames(None, "Select a Model", "Models/", "model(*.h5)")
+
+        self.selectedModel = dialog[0][0] # path is encapsulated inside another array
+
+        if self.ui.predict_batch_name.toPlainText() == '' or self.ui.modelName.toPlainText() == '':
+            path = os.path.dirname(self.selectedModel)
+            self.ui.predict_batch_name.setText(os.path.basename(path))
+
         self.check_for_enable_process_button()
 
     def item_selection_changed(self, item):
@@ -120,7 +125,8 @@ class FramePredictor:
 
         dataset_file = self.keypointManager.save_files_to_dataset(frame_files, False, self.DATASET_RESULTS_DIRECTORY)
 
-        data_for_prediction = FormatManager.format_dataset(self.DATASET_RESULTS_DIRECTORY + self.PREDICT_DIRECTORY + batch_name + dataset_file)
+        data_for_prediction = FormatManager.format_dataset(
+            self.DATASET_RESULTS_DIRECTORY + self.PREDICT_DIRECTORY + batch_name + dataset_file)
 
         self.kerasManager.load_model(self.selectedModel)
         result_files = self.kerasManager.predict(data_for_prediction, frame_files)
