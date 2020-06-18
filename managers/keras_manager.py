@@ -38,9 +38,9 @@ class KerasManager:
         count = 0
         for result in results:
             indexed_results.append(
-                [frame_files[count],
+                [frame_files[count], # index of frame
                  "Likely a " + self.labels[labels[count]] + " with a confidence of " \
-                 + str(round(Decimal(result[labels[count]] * 100), 2))
+                 + str(round(Decimal(result[labels[count]] * 100), 2)) # condifence level
                  ]
             )
             count += 1
@@ -50,13 +50,12 @@ class KerasManager:
     def model_init(self):
         # CONFIGS
         init = "he_normal"
-        reg = l2(0.0005)
+        reg = l2(0.001)
         input_shape = (1, 25, 3)
         classes = len(self.postures)  # len of labels (3 for now)
 
         model = Sequential()
 
-        # This is mostly copied for Kim's link, I only changed the Conv2D things the example: (1,4)
         # 16 FILTERS
         # 7x7 filters -- 2x2 strides
         # the spatial dimensions of the volume
@@ -68,11 +67,11 @@ class KerasManager:
         model.add(Conv2D(32, (3, 3), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        # model.add(BatchNormalization(axis=chanDim))
+
         model.add(Conv2D(32, (3, 3), strides=(2, 2), padding="same",
                          kernel_initializer=init, kernel_regularizer=reg))
         model.add(Activation("relu"))
-        # model.add(BatchNormalization(axis=chanDim))
+
         model.add(Dropout(0.25))
 
         # stack two more CONV layers, keeping the size of each filter

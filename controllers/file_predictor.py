@@ -66,7 +66,7 @@ class FramePredictor:
 
     def select_model(self):
         self.ui.predict_progressbar.setValue(0)
-        dialog = QFileDialog.getOpenFileName()
+        dialog = QFileDialog.getOpenFileNames(None, "Select a Model", "/", "model(*.h5)")
         self.selectedModel = dialog[0]
         self.check_for_enable_process_button()
 

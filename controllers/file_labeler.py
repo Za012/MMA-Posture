@@ -62,7 +62,9 @@ class FileLabeler:
 
     def directory_button_clicked(self):
         self.clear()
-        dialog = QFileDialog.getExistingDirectory()
+
+        dialog = QFileDialog.getExistingDirectory(None, 'Select the directory of your generated batch', 'Generated/')
+
         self.selectedDirectory = dialog
 
         for item in os.listdir(dialog):

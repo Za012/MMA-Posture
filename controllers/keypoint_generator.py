@@ -30,7 +30,7 @@ class KeyPointGenerator:
 
     def import_button_clicked(self):
         self.ui.openpose_progress.setValue(0)
-        dialog = QFileDialog.getOpenFileNames()
+        dialog = QFileDialog.getOpenFileNames(None, "Select a video", "/", "video(*.mp4 *.avi)")
         self.files += dialog[0]
 
         if len(self.files) > 0:

@@ -80,7 +80,7 @@ class KeyPointManager:
         dst = self.generationDirectory + self.batchName + "/"
         if not os.path.exists(dst):
             os.mkdir(dst)
-        
+
         # Do Openpose on batch on each video and save keypoints
         i = 0
         progress = 5

@@ -31,7 +31,7 @@ class Teach:
         self.ui.teachBtn.clicked.connect(self.teach)
 
     def select_dataset_directory(self):
-        dirs = QFileDialog.getExistingDirectory(None, "Select a batch", "../datasets")
+        dirs = QFileDialog.getExistingDirectory(None, 'Select a batchh', 'Datasets/')
         if not dirs:
             return
 
