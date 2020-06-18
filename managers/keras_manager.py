@@ -121,7 +121,7 @@ class KerasManager:
         print(len(labels))
         print(len(dataset))
 
-        (trainX, testX, trainY, testY) = train_test_split(dataset, labels, test_size=0.25,
+        (trainX, testX, trainY, testY) = train_test_split(dataset, labels, test_size=0.25, stratify=self.labels,
                                                           random_state=42)
 
         print("SHAPES")
