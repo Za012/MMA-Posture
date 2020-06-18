@@ -201,6 +201,7 @@ class Ui_MainWindow(object):
         self.batch_name_label_2.setAlignment(Qt.AlignCenter)
         self.predict_batch_name = QTextEdit(self.predict)
         self.predict_batch_name.setObjectName(u"predict_batch_name")
+        self.predict_batch_name.setEnabled(False)
         self.predict_batch_name.setGeometry(QRect(320, 102, 141, 31))
         self.predict_batch_name.setFont(font)
         self.predict_select_model = QPushButton(self.predict)
@@ -222,7 +223,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
